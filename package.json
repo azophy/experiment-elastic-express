@@ -1,0 +1,15 @@
+{
+  "name": "experiment-elastic-nodejs",
+  "version": "1.0.0",
+  "description": "experiment creating Express API with elastic as data storage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "azophy@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.13.1",
+    "express": "^4.19.2"
+  }
+}
