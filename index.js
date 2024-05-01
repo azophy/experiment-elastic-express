@@ -1,8 +1,9 @@
 const express = require('express')
+const bodyParser = require('body-parser')
+const { Client } = require('es7')
+
 const app = express()
 const port = process.env.APP_PORT || 3000
-
-const { Client } = require('es7')
 const client = new Client({
   node: 'http://172.17.0.1:9200', // Elasticsearch endpoint
   //auth: {
@@ -12,6 +13,8 @@ const client = new Client({
 })
 
 const INDEX_NAME = 'my_index'
+
+app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -106,6 +109,22 @@ app.get('/elastic/list_by_position/:position', async (req, res) => {
       count: body.hits.total.value,
       results: body.hits.hits.map(item => item._source),
     })
+  } catch (e) {
+    res.send('error: ' + e.message)
+  }
+})
+
+// using SQL query for elastic. ref: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/7.17/sql_query_examples.html
+// example using CURL:
+//    curl --header "Content-Type: application/json" \
+//      --data '{"query":"SELECT * FROM my_index WHERE position='IT'"}' \
+//      http://localhost:3000/elastic/sql_query
+app.post('/elastic/sql_query', async (req, res) => {
+  try {
+    const { body } = await client.sql.query({
+      body: req.body
+    })
+    res.send(body)
   } catch (e) {
     res.send('error: ' + e.message)
   }
