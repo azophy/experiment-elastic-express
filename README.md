@@ -1,6 +1,12 @@
 EXPERIMENT ELASTIC EXPRESS
 ==========================
 
+## Implemented API
+- '/elastic/create_index' -> create index to be filled
+- '/elastic/insert_dummies/:count' -> populate with dummy data
+- '/elastic/refresh_index' -> refresh index before we could search
+- '/elastic/list_by_position/:position' -> search by position
+
 ## Setup
 1. clone this repo
 2. docker compose up
