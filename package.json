@@ -4,12 +4,16 @@
   "description": "experiment creating Express API with elastic as data storage",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon index.js"
   },
   "author": "azophy@gmail.com",
   "license": "MIT",
   "dependencies": {
     "@elastic/elasticsearch": "^8.13.1",
     "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
