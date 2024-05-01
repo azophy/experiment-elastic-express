@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@elastic/elasticsearch": "^8.13.1",
+    "es7": "npm:@elastic/elasticsearch@^7.17.13",
     "express": "^4.19.2"
   },
   "devDependencies": {
