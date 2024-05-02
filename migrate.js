@@ -1,14 +1,4 @@
-var mysql = require('mysql');
-
-var con = mysql.createConnection({
-  host: "host.docker.internal",
-  //host: "172.17.0.1",
-  port: "3307",
-  user: "sikdweb",
-  password: "sikdweb",
-  database: "baru",
-});
-
+var { con } = require('./mysql_client')
 var { client: elasticClient } = require('./elastic_client')
 
 function sleep(time) {
@@ -35,7 +25,8 @@ con.connect(async (err) => {
   if (err) throw err;
   console.log("Mysql connected!");
 
-  await runMigration('3756398', 100)
+  //await runMigration('3756398', 100)
+  await runMigration(null, 500)
 
   con.end((err) => {
     // The connection is terminated gracefully
@@ -117,7 +108,7 @@ async function prepareIndex() {
             orig_id: { type: 'integer' },
             nkey: { type: 'text' },
             nid: { type: 'text' },
-            girid: { type: 'text' },
+            gir_id: { type: 'text' },
             from_user_id: { type: 'integer' },
             from_user_name: { type: 'text' },
             from_role_id: { type: 'text' },
