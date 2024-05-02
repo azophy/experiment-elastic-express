@@ -25,8 +25,8 @@ con.connect(async (err) => {
   if (err) throw err;
   console.log("Mysql connected!");
 
-  //await runMigration('3756398', 100)
-  await runMigration(null, 500)
+  await runMigration('5323', 500)
+  //await runMigration(null, 500)
 
   con.end((err) => {
     // The connection is terminated gracefully
@@ -74,14 +74,14 @@ async function runMigration(startFrom = null, chunkSize = 100) {
       JOIN role as receiver_role on receiver_role.RoleId = inbox_receiver.RoleId_To
       JOIN inbox on inbox.NId = inbox_receiver.NId
       ${whereQuery} 
-      ORDER BY id asc 
+      -- ORDER BY id asc 
       LIMIT ${chunkSize}`
 
     const rows = await runQuery(query)
+    console.log('got ' + rows.length + ' items')
     startFrom = rows[rows.length-1].orig_id
     //console.log('Data received from Db:');
     //console.log(rows);
-    console.log('got ' + rows.length + ' items')
     console.log('next startFrom ' + startFrom)
 
     await insertToElastic(rows)
@@ -90,6 +90,7 @@ async function runMigration(startFrom = null, chunkSize = 100) {
 
     // we reach end of data
     if (rows.length <= 0)  break;
+    loop++
   }
 }
 
