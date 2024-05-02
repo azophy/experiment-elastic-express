@@ -25,8 +25,8 @@ con.connect(async (err) => {
   if (err) throw err;
   console.log("Mysql connected!");
 
-  await runMigration('5323', 500)
-  //await runMigration(null, 500)
+  //await runMigration('5323', 500)
+  await runMigration(null, 500)
 
   con.end((err) => {
     // The connection is terminated gracefully
@@ -68,11 +68,11 @@ async function runMigration(startFrom = null, chunkSize = 100) {
         receiver_role.RoleName as to_role_name,
         inbox.AsalNaskah as asal_naskah
       FROM inbox_receiver 
-      JOIN people as sender on sender.PeopleId = inbox_receiver.From_Id
-      JOIN role as sender_role on sender_role.RoleId = inbox_receiver.RoleId_From
-      JOIN people as receiver on receiver.PeopleId = inbox_receiver.To_Id
-      JOIN role as receiver_role on receiver_role.RoleId = inbox_receiver.RoleId_To
-      JOIN inbox on inbox.NId = inbox_receiver.NId
+      LEFT JOIN people as sender on sender.PeopleId = inbox_receiver.From_Id
+      LEFT JOIN role as sender_role on sender_role.RoleId = inbox_receiver.RoleId_From
+      LEFT JOIN people as receiver on receiver.PeopleId = inbox_receiver.To_Id
+      LEFT JOIN role as receiver_role on receiver_role.RoleId = inbox_receiver.RoleId_To
+      LEFT JOIN inbox on inbox.NId = inbox_receiver.NId
       ${whereQuery} 
       -- ORDER BY id asc 
       LIMIT ${chunkSize}`
