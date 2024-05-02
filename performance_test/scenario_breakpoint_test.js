@@ -1,5 +1,5 @@
 import { dateTime, defaultBreakpointTestOption, defaultBreakpointTestThreshold } from './common.js'
-export { default, handleSummary } from './common.js'
+export { setup, default, handleSummary } from './common.js'
 
 export const options = {
   scenarios: {

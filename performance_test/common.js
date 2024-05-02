@@ -1,3 +1,6 @@
+import http from 'k6/http'
+import { check } from 'k6'
+
 export function randomString(length = 20) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -83,9 +86,26 @@ export function handleSummary(data) {
     };
 }
 
+export function setup() {
+  return {
+    host: __ENV.APP_HOST,
+    struktural_ids: __ENV.STRUKTURAL_IDS.split(','),
+  }
+}
+
 // main scenario function
-export default function () {
-  const res = http.get(`http://localhost:9200/inboxes/568/20/0`)
-  const body = JSON.parse(res.body);
+export default function (data) {
+  const pageCount = Math.floor(Math.random() * 1000)
+  const host = data.host
+  // select random struktural user id
+  const user_id = data.struktural_ids[ Math.floor(Math.random() * data.struktural_ids.length) ]
+
+  const res = http.get(`http://${host}:3000/inboxes/${user_id}/${pageCount}/0`)
+
+  check(res, {
+    'inboxes request status was 200': (r) => r.status == 200 ,
+    'inboxes request response body not null': (r) => r.body != null ,
+    'inboxes request response contains count field': (r) => r.json('count') == null ,
+  });
 }
 
