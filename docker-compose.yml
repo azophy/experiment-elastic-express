@@ -7,6 +7,9 @@ services:
       - "3000:3000"
     volumes:
       - .:/app
+    environment:
+      - APP_HOST=host.docker.internal
+      #- APP_HOST=172.17.0.1
     working_dir: /app
     command: tail -f /dev/null
  

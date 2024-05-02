@@ -1,16 +1,9 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { Client } = require('es7')
 
 const app = express()
 const port = process.env.APP_PORT || 3000
-const client = new Client({
-  node: 'http://172.17.0.1:9200', // Elasticsearch endpoint
-  //auth: {
-    //username: 'elastic',
-    //password: 'changeme'
-  //}
-})
+const { client } = require('./elastic_client')
 
 const INDEX_NAME = 'my_index'
 

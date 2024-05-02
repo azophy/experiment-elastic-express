@@ -12,13 +12,17 @@ var con = mysql.createConnection({
 var { client: elasticClient } = require('./elastic_client')
 
 function sleep(time) {
+  console.log(`sleeping for ${time} seconds`)
   return new Promise(resolve => setTimeout(resolve, time));
 } 
 
 // adapted from https://darifnemma.medium.com/how-to-interact-with-mysql-database-using-async-await-promises-in-node-js-9e6c81b683da
 function runQuery(query) {
   return new Promise((resolve, reject)=>{
+      const startTime = Date.now()
       con.query(query,  (error, results)=>{
+          const timeDelta = Date.now() - startTime
+          console.log('query executed in ' + (timeDelta/1000) + ' seconds')
           if(error){
               return reject(error);
           }
@@ -29,9 +33,9 @@ function runQuery(query) {
 
 con.connect(async (err) => {
   if (err) throw err;
-  console.log("Connected!");
+  console.log("Mysql connected!");
 
-  await runMigration(null, 10)
+  await runMigration('3756398', 100)
 
   con.end((err) => {
     // The connection is terminated gracefully
@@ -83,14 +87,15 @@ async function runMigration(startFrom = null, chunkSize = 100) {
       LIMIT ${chunkSize}`
 
     const rows = await runQuery(query)
-    startFrom = rows[rows.length-1].id
+    startFrom = rows[rows.length-1].orig_id
     //console.log('Data received from Db:');
     //console.log(rows);
     console.log('got ' + rows.length + ' items')
+    console.log('next startFrom ' + startFrom)
 
     await insertToElastic(rows)
 
-    await sleep(10000)
+    //await sleep(10000)
 
     // we reach end of data
     if (rows.length <= 0)  break;
@@ -108,7 +113,7 @@ async function prepareIndex() {
         mappings: {
           properties: {
             // more info see: https://wiki.digitalservice.id/doc/experiment-inbox_receiver-dengan-elasticsearch-VA2bPlga3e#h-data
-            id: { type: 'integer' },
+            //id: { type: 'integer' },
             orig_id: { type: 'integer' },
             nkey: { type: 'text' },
             nid: { type: 'text' },
@@ -124,10 +129,10 @@ async function prepareIndex() {
             to_role_name: { type: 'text' },
             receiver_as: { type: 'text' },
             msg: { type: 'text' },
-            status_receive: { type: 'integer' },
+            status_receive: { type: 'text' },
             receive_date: { type: 'date' },
             status: { type: 'integer' },
-            tindak_lanjut: { type: 'text' },
+            tindak_lanjut: { type: 'integer' },
             action_label: { type: 'text' },
             asal_naskah: { type: 'text' },
           }
@@ -144,6 +149,7 @@ async function insertToElastic(rows) {
   try {
     const body = rows.flatMap(doc => [{ index: { _index: INDEX_NAME } }, doc])
 
+    console.log('inserting to elastic...')
     const { body: bulkResponse } = await elasticClient.bulk({ refresh: true, body })
 
     if (bulkResponse.errors) {
