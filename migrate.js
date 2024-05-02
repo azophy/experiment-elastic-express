@@ -1,25 +1,10 @@
-var { con } = require('./mysql_client')
+var { con, runQuery } = require('./mysql_client')
 var { client: elasticClient } = require('./elastic_client')
 
 function sleep(time) {
   console.log(`sleeping for ${time} seconds`)
   return new Promise(resolve => setTimeout(resolve, time));
 } 
-
-// adapted from https://darifnemma.medium.com/how-to-interact-with-mysql-database-using-async-await-promises-in-node-js-9e6c81b683da
-function runQuery(query) {
-  return new Promise((resolve, reject)=>{
-      const startTime = Date.now()
-      con.query(query,  (error, results)=>{
-          const timeDelta = Date.now() - startTime
-          console.log('query executed in ' + (timeDelta/1000) + ' seconds')
-          if(error){
-              return reject(error);
-          }
-          return resolve(results);
-      });
-  });
-}
 
 con.connect(async (err) => {
   if (err) throw err;

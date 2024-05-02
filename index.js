@@ -4,8 +4,9 @@ const bodyParser = require('body-parser')
 const app = express()
 const port = process.env.APP_PORT || 3000
 const { client } = require('./elastic_client')
+var { con, runQuery } = require('./mysql_client')
 
-const INDEX_NAME = 'my_index'
+const INDEX_NAME = 'sidebar_inbox_receiver'
 
 app.use(bodyParser.json())
 
@@ -13,111 +14,95 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.get('/elastic/create_index', async (req, res) => {
-  try {
-    await client.indices.create({ index: INDEX_NAME })
-    res.send('Success!')
-  } catch (e) {
-    res.send('error: ' + e.message)
-  }
-})
+app.get('/inboxes/:id/:page_count/:after_id', async (req, res) => {
+  const to_user_id = req.params.id
+  const page_count = req.params.page_count || 20
+  const after_id = req.params.after_id || 0
 
-function randomString(len = 10) {
-  const str = Math.floor(Math.random() * Math.pow(32, len)).toString(32);
-  return str.padStart(len, '0')
-}
-
-function generateId() {
-  return Math.floor(Date.now() / 1000).toString(32) + randomString(8)
-}
-
-app.get('/elastic/insert_people/:name/:position', async (req, res) => {
-  //const id = generateId()
   const payload = {
-      index: INDEX_NAME,
-      //id,
-      body: req.params,
-  }
-  console.log(payload)
-
-  try {
-    const result = await client.index(payload)
-    res.send(result)
-  } catch (e) {
-    res.send('error: ' + e.message)
-  }
-})
-
-app.get('/elastic/insert_dummies/:count', async (req, res) => {
-  const count = req.params.count
-  const availablePositions = [
-    'admin',
-    'writer',
-    'clerk',
-    'HR',
-    'IT'
-  ]
-
-  let succeed = 0
-  for (let i=0;i<count;i++) {
-    try {
-      const payload = {
-          index: INDEX_NAME,
-          body: {
-            name: randomString(5),
-            position: availablePositions[
-              Math.floor(Math.random() * availablePositions.length)
-            ],
-          },
-      }
-      console.log(payload)
-      const result = await client.index(payload)
-      succeed++
-    } catch (e) {
-      console.log('error: ' + e.message)
+    index: INDEX_NAME,
+    body: {
+      query: { bool: { must: [ // query AND paling luar
+            // -- dari InboxFilterTrait->nondispositionQuery() 
+            { bool: { should: [
+                  { bool: { must: [
+                        { terms: { receiver_as: [  
+                          'to',
+                          'koreksi',
+                          'to_edaran',
+                          'to_forward',
+                          'to_keluar',
+                          'to_notadinas',
+                          'to_pengumuman',
+                          'to_rekomendasi',
+                          'to_sket',
+                          'to_sprint',
+                          'to_super_tugas_keluar',
+                          'to_surat_izin_keluar'
+                        ] }},
+                        { bool: { should: [
+                              { bool: { must_not: { term: { from_group_id: "6" }  } } }, // != uk
+                              { bool: { must_not: { term: { receiver_as: 'to_forward' }  } } },
+                        ]}}
+                  ] } },
+                  { terms: { receiver_as: ['cc1', 'nondisposition'] }}
+            ] } },
+            // -- dari InboxFilterTrait->queryInternalScopeProv()
+            { bool: { should: [
+                  { terms: { receiver_as: [
+                    'cc1', 'to_archive', 'to_distributed', 'to_forward', 
+                    'to_notadinas', 'to_pengumuman', 'to_rekomendasi', 
+                    'to_sket', 'to_sprint', 'to_super_tugas_keluar', 
+                    'to_surat_izin_keluar'
+                  ] }},
+                  { bool: { must: [
+                        { term: { receiver_as: 'to' }},
+                        { bool: { must_not: { term: { asal_naskah: 'eksternal' }  } } },
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            // -- filter owner kotak masuk
+            { term: { to_user_id }}
+          ]
+        }
+      },
+      //query: { term: { to_user_id }},
+      sort: [
+        { receive_date: { order: 'desc' }}
+      ],
+      from: after_id,
+      size: page_count,
     }
   }
-  res.send('succeed: ' + succeed)
-})
-
-app.get('/elastic/refresh_index', async (req, res) => {
-  await client.indices.refresh({ index: INDEX_NAME })
-  res.send('done')
-})
-
-app.get('/elastic/list_by_position/:position', async (req, res) => {
-  const position = req.params.position
 
   try {
-    const { body } = await client.search({
-      index: INDEX_NAME,
-      // type: '_doc', // uncomment this line if you are using {es} ≤ 6
-      body: {
-        query: {
-          match: { position }
-        }
-      }
-    })
-    res.send({
-      count: body.hits.total.value,
-      results: body.hits.hits.map(item => item._source),
-    })
-  } catch (e) {
-    res.send('error: ' + e.message)
-  }
-})
+    const result = await client.search(payload);
 
-// using SQL query for elastic. ref: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/7.17/sql_query_examples.html
-// example using CURL:
-//    curl --header "Content-Type: application/json" \
-//      --data '{"query":"SELECT * FROM my_index WHERE position='IT'"}' \
-//      http://localhost:3000/elastic/sql_query
-app.post('/elastic/sql_query', async (req, res) => {
-  try {
-    const { body } = await client.sql.query({
-      body: req.body
+    //let data = result.body.hits.hits.map(item => item._source)
+    let data = {}
+    result.body.hits.hits.map(item => {
+      data[item._source.nid] = item._source
     })
-    res.send(body)
+    let nids = Object.keys(data)
+    console.log('NIds: ' + nids)
+    
+    const mysqlRes = await runQuery('SELECT * from inbox WHERE NId in (?)', nids)
+    console.log(mysqlRes)
+    console.log(mysqlRes.sql)
+
+    mysqlRes.flatMap(item => {
+      if (data[item.NId])
+        data[item.NId].naskah = item
+    })
+    //const body = rows.flatMap(doc => [{ index: { _index: INDEX_NAME } }, doc])
+
+    res.json({
+      count: result.body.hits.total.value,
+      data,
+    })
   } catch (e) {
     res.send('error: ' + e.message)
   }
