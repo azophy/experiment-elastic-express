@@ -1,11 +1,13 @@
 EXPERIMENT ELASTIC EXPRESS
 ==========================
 
-## Implemented API
-- '/elastic/create_index' -> create index to be filled
-- '/elastic/insert_dummies/:count' -> populate with dummy data
-- '/elastic/refresh_index' -> refresh index before we could search
-- '/elastic/list_by_position/:position' -> search by position
+## Links
+- experiment wiki: https://wiki.digitalservice.id/doc/experiment-inbox_receiver-dengan-elasticsearch-VA2bPlga3e
+- clickup card: https://app.clickup.com/t/9003239225/GOS-5931
+
+## Implemented features
+- 'migrate.js' -> migration from mysql table into elasticsearch index
+- API '/inboxes/:id/:page_count/:from' -> attempt to simulate 'Inboxes' query in Mobile API v1
 
 ## Setup
 1. clone this repo
