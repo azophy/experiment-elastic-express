@@ -18,6 +18,12 @@ EXPERIMENT ELASTIC EXPRESS
 ## Troubleshoot
 - if you encounter error during elasticsearch's startup, this SO thread may be helpful: https://stackoverflow.com/questions/56937171/efk-elasticsearch-1-exited-with-code-78-when-install-elasticsearch
 
+## Performance test
+- we provided `performance_test` folder which contain k6 scripts to run performance test against this API
+- requirements:
+  - k6 & nodejs installed locally (without docker)
+- how to run: from root of this repo run `node ./performance_test/run_all.js`
+
 ## References
 - elasticsearch with nestjs tutorial, include setup es & nestjs module: https://wanago.io/2020/09/07/api-nestjs-elasticsearch/
 - getting started es client for js: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/getting-started-js.html#_creating_an_index
