@@ -1,10 +1,14 @@
 var fs = require('fs');
 
 const APP_HOST = process.env.APP_HOST
-const USER_ID = 2811
+const USER_ID = 2811 // a.n. DIKKY AHMAD
 const PAGE_SIZE = 300
 
 const randomNumber = (len) => Math.floor(Math.random() * len)
+
+const timestamp = Date.now()
+
+const RESULT_FILENAME = `retrieve_elastic_${USER_ID}_${timestamp}.csv`
 
 function sleep(time) {
   console.log(`sleeping for ${time} seconds`)
@@ -38,7 +42,7 @@ async function run() {
     console.log(rows)
     const csv = rows.map(r => r.join(';')).join("\n")
 
-    fs.appendFile(`retrieve_elastic_${USER_ID}.csv`, csv + "\n", console.log)
+    fs.appendFile(RESULT_FILENAME, csv + "\n", console.log)
 
     //await sleep(10000)
   }

@@ -1,9 +1,13 @@
 var fs = require('fs');
 
 const APP_HOST = process.env.APP_HOST
-const USER_ID = 2811
+const USER_ID = 2811 // a.n. DIKKY AHMAD
 
 const randomNumber = (len) => Math.floor(Math.random() * len)
+
+const timestamp = Date.now()
+
+const RESULT_FILENAME = `retrieve_mobileapi_${USER_ID}_${timestamp}.csv`
 
 function MobileApiRequest(body, token = null) {
   let headers = {
@@ -33,7 +37,7 @@ async function run() {
   })
   let contentLogin = await resLogin.json()
   let token = contentLogin.data.login.access_token
-  let after = 'OTAw'
+  let after = null
 
   if (token) console.log('login succeed')
 
@@ -69,7 +73,7 @@ async function run() {
 
     console.log('countThisPage: ' + countThisPage)
 
-    if (!resInboxes.ok || contentInboxes.errors.length || countThisPage <= 0) break;
+    if (!resInboxes.ok || contentInboxes.errors?.length || countThisPage <= 0) break;
 
     after = contentInboxes.data.inboxes.pageInfo.endCursor
 
@@ -82,7 +86,7 @@ async function run() {
     console.log(rows)
     const csv = rows.map(r => r.join(';')).join("\n")
 
-    fs.appendFile(`retrieve_mobileapi_${USER_ID}.csv`, csv + "\n", console.log)
+    fs.appendFile(RESULT_FILENAME, csv + "\n", console.log)
   }
 }
 
