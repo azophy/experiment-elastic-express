@@ -39,7 +39,7 @@ export const defaultBreakpointTestOption = {
   preAllocatedVUs: 1000,
   startTime: '15s', // the ramping API test starts a little later
   stages: [
-    { duration: '2h', target: 5000 },
+    { duration: '15m', target: 1000 },
   ],
   tags: {
     test_type: 'breakpoint_test',

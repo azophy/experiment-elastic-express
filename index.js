@@ -6,7 +6,8 @@ const port = process.env.APP_PORT || 3000
 const { client } = require('./elastic_client')
 var { con, runQuery } = require('./mysql_client')
 
-const INDEX_NAME = 'sidebar_inbox_receiver'
+//const INDEX_NAME = 'sidebar_inbox_receiver'
+const INDEX_NAME = 'test_sidebar_elastic_bigdata' // index used in seed_dummy.js
 
 app.use(bodyParser.json())
 
