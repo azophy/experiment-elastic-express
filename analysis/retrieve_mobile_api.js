@@ -82,7 +82,7 @@ async function run() {
     console.log(rows)
     const csv = rows.map(r => r.join(';')).join("\n")
 
-    fs.appendFile(`retrieve_inboxes_${USER_ID}.csv`, csv + "\n", console.log)
+    fs.appendFile(`retrieve_mobileapi_${USER_ID}.csv`, csv + "\n", console.log)
   }
 }
 
