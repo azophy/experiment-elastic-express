@@ -69,7 +69,7 @@ async function run() {
 
     console.log('countThisPage: ' + countThisPage)
 
-    if (contentInboxes.data.inboxes.pageInfo.count <= 0) break;
+    if (!resInboxes.ok || contentInboxes.errors.length || countThisPage <= 0) break;
 
     after = contentInboxes.data.inboxes.pageInfo.endCursor
 

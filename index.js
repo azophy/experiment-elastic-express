@@ -57,12 +57,18 @@ app.get('/inboxes/:id/:page_count/:after_id', async (req, res) => {
                     'to_sket', 'to_sprint', 'to_super_tugas_keluar', 
                     'to_surat_izin_keluar'
                   ] }},
+                  /*
                   { bool: { must: [
                         { term: { receiver_as: 'to' }},
                         { bool: { must_not: { term: { asal_naskah: 'eksternal' }  } } },
                       ]
                     }
-                  }
+                  },
+                  */
+                  { bool: {
+                    must: { term: { receiver_as: 'to' } },
+                    must_not: { term: { asal_naskah: 'eksternal' } },
+                  } },
                 ]
               }
             },
