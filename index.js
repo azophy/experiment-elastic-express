@@ -22,7 +22,9 @@ app.get('/inboxes/:id/:page_count/:after_id', async (req, res) => {
   const payload = {
     index: INDEX_NAME,
     body: {
-      query: { bool: { must: [ // query AND paling luar
+      query: { bool: {
+          filter: { exists: { field: "from_user_id" } },
+          must: [ // query AND paling luar
             // -- dari InboxFilterTrait->nondispositionQuery() 
             { bool: { should: [
                   { bool: { must: [
